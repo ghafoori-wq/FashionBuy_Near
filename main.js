@@ -2795,7 +2795,8 @@ async function submitDesignIdea() {
         }
     };
     const profile = payload.profile;
-    const pollUrl = 'https://pollinations.ai' + encodeURIComponent(prompt + ', ' + (profile.gender || 'fashion') + ' couture editorial studio full-body outfit') + '?width=768&height=1024&nologo=true&seed=' + Date.now();
+    const pollUrl = `https://pollinations.ai${encodeURIComponent(prompt)}?width=768&height=1024&nologo=true&seed=${Date.now()}`;
+    const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=768&h=1024&fit=crop';
     try {
         const r = await fetch('/api/design-idea', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2806,7 +2807,7 @@ async function submitDesignIdea() {
         if (j.error && !imageUrl) throw new Error(j.detail || j.error);
         if (!imageUrl) imageUrl = pollUrl; // Pollinations.ai fallback: always a real fashion image
         lastDesign = { ...j, concept: j.reply || prompt, imageUrl };
-        const html = `${imageUrl ? `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img">` : ''}` +
+        const html = `${imageUrl ? `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img" onerror="this.onerror=null;this.src='${esc(FALLBACK_IMAGE)}';">` : ''}` +
             `${imageUrl ? `<div class="sketch-caption">🎨 Design — “${esc(prompt)}”</div>` : ''}` +
             `${j.reply ? `<div style="margin-top:6px;line-height:1.5">${esc(j.reply)}</div>` : ''}` +
             `${j.followUpQuestions ? `<div class="q">💬 ${esc(j.followUpQuestions)}</div>` : ''}`;
@@ -2816,7 +2817,7 @@ async function submitDesignIdea() {
         // API error or empty result: use Pollinations.ai so the user never sees a blank screen
         const imageUrl = pollUrl;
         lastDesign = { concept: prompt, imageUrl, source: 'pollinations-fallback' };
-        const html = `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img">` +
+        const html = `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img" onerror="this.onerror=null;this.src='${esc(FALLBACK_IMAGE)}';">` +
             `<div class="sketch-caption">🎨 Design — “${esc(prompt)}”</div>`;
         resEl.innerHTML = html;
         if (actEl) actEl.classList.add('visible');
