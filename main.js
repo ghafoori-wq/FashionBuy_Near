@@ -2795,8 +2795,7 @@ async function submitDesignIdea() {
         }
     };
     const profile = payload.profile;
-    const fullFashionPrompt = `${prompt} — ${profile.gender} ${profile.season} fashion, skin tone ${profile.skin}`;
-    const pollUrl = `https://pollinations.ai/${encodeURIComponent(fullFashionPrompt)}?width=768&height=1024&nologo=true&seed=${Date.now()}`;
+    const pollUrl = 'https://pollinations.ai' + encodeURIComponent(prompt + ', ' + (profile.gender || 'fashion') + ' couture editorial studio full-body outfit') + '?width=768&height=1024&nologo=true&seed=' + Date.now();
     try {
         const r = await fetch('/api/design-idea', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
