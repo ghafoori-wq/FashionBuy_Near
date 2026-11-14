@@ -2274,8 +2274,8 @@ const NEAR_USD_RATE = 5;
 const NEAR_CDN = 'https://cdn.jsdelivr.net/npm/near-api-js@2.1.4/dist/near-api-js.min.js';
 const NEAR_TESTNET_CONFIG = {
     networkId: 'testnet',
-    nodeUrl: 'https://near.org',
-    walletUrl: 'https://meteorwallet.app',
+    nodeUrl: 'https://rpc.testnet.near.org',
+    walletUrl: 'https://mynearwallet.com',
     helperUrl: 'https://helper.testnet.near.org',
     explorerUrl: 'https://explorer.testnet.near.org'
 };
