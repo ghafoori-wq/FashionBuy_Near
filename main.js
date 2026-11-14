@@ -2794,23 +2794,33 @@ async function submitDesignIdea() {
             measurements: getMeasurements()
         }
     };
+    const profile = payload.profile;
+    const fullFashionPrompt = `${prompt} — ${profile.gender} ${profile.season} fashion, skin tone ${profile.skin}`;
+    const pollUrl = `https://pollinations.ai/${encodeURIComponent(fullFashionPrompt)}?width=768&height=1024&nologo=true&seed=${Date.now()}`;
     try {
         const r = await fetch('/api/design-idea', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         const j = await r.json();
-        const imageUrl = j.imageUrl || j.image || '';
+        let imageUrl = j.imageUrl || j.image || '';
         if (j.error && !imageUrl) throw new Error(j.detail || j.error);
+        if (!imageUrl) imageUrl = pollUrl; // Pollinations.ai fallback: always a real fashion image
         lastDesign = { ...j, concept: j.reply || prompt, imageUrl };
         const html = `${imageUrl ? `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img">` : ''}` +
-            `${imageUrl ? `<div class="sketch-caption">🎨 Replicate design — “${esc(prompt)}”</div>` : ''}` +
+            `${imageUrl ? `<div class="sketch-caption">🎨 Design — “${esc(prompt)}”</div>` : ''}` +
             `${j.reply ? `<div style="margin-top:6px;line-height:1.5">${esc(j.reply)}</div>` : ''}` +
             `${j.followUpQuestions ? `<div class="q">💬 ${esc(j.followUpQuestions)}</div>` : ''}`;
         resEl.innerHTML = html;
         if (imageUrl && actEl) actEl.classList.add('visible');
     } catch (e) {
-        resEl.innerHTML = `<span style="color:#ff8ac2">⚠ Design sketch failed.</span><br><small style="color:#9d8fd0">${esc(e.message)}</small>`;
+        // API error or empty result: use Pollinations.ai so the user never sees a blank screen
+        const imageUrl = pollUrl;
+        lastDesign = { concept: prompt, imageUrl, source: 'pollinations-fallback' };
+        const html = `<img src="${esc(imageUrl)}" alt="AI design: ${esc(prompt)}" class="sketcher-img">` +
+            `<div class="sketch-caption">🎨 Design — “${esc(prompt)}”</div>`;
+        resEl.innerHTML = html;
+        if (actEl) actEl.classList.add('visible');
     }
     sketchBusy = false;
 }
